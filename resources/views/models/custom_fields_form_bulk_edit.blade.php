@@ -24,14 +24,14 @@
     @foreach($model->fieldset->fields AS $field)
         @php
         //prevents some duplicate queries - open to a better way of skipping dupes in output
-        //its ugly, but if we'd rather deal with duplicate queries we can get rid of this. 
+        //its ugly, but if we'd rather deal with duplicate queries we can get rid of this.
             if (in_array($field->db_column_name(), $fields)) {
                 $duplicate = true;
-                continue; 
+                continue;
             } else {
                 $duplicate = false;
             }
-            $fields[] = $field->db_column_name(); 
+            $fields[] = $field->db_column_name();
         @endphp
 
     <div class="form-group{{ $errors->has($field->db_column_name()) ? ' has-error' : '' }}">
@@ -61,8 +61,6 @@
               @php
                   $fieldName = $field->db_column_name();
                   $oldValues = old($fieldName);
-                  $currentValues = isset($item) ? array_map('trim', explode(',', $item->{$fieldName})) : '';
-
                   $selectedValues = is_array($oldValues) ? $oldValues : [];
               @endphp
 
@@ -75,6 +73,21 @@
                       {{ $value }}
                   </label>
               @endforeach
+            @elseif ($field->element=='multi-listbox')
+                    <!-- Multi-Listbox -->
+            @php
+                $fieldName = $field->db_column_name();
+                $oldValues = old($fieldName);
+                $selectedValues = is_array($oldValues) ? $oldValues : [];
+            @endphp
+
+            <x-input.select
+                :name="$fieldName.'[]'"
+                :options="$field->formatFieldValuesAsArray()"
+                :selected="$selectedValues"
+                multiple
+                class="format form-control"
+            />
             @elseif ($field->element=='radio')
                   @php
                       $fieldName = $field->db_column_name();
@@ -149,9 +162,9 @@
 
 
                 @else
-                    
+
                     @if (($field->field_encrypted=='0') || (Gate::allows('admin')))
-                        @if ($field->is_unique) 
+                        @if ($field->is_unique)
                                 <input type="text" class="form-control" disabled value="{{trans('/admin/hardware/form.bulk_update_custom_field_unique')}}">
                             @endif
                             @if(!$field->is_unique)
@@ -166,7 +179,7 @@
                             @else
                                 <input type="text" value="{{ strtoupper(trans('admin/custom_fields/general.encrypted')) }}" class="form-control disabled" disabled>
                     @endif
-                   
+
                 @endif
 
           @endif
@@ -185,8 +198,6 @@
         @endif
 
 
-              
-              
 
           <?php
           $errormessage=$errors->first($field->db_column_name());
